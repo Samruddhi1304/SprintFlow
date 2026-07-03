@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# Vite
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
