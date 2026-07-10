@@ -1,5 +1,6 @@
 import express from "express";
 import authRouter from "./modules/auth/auth.routes.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.get("/", (req, res) => {
 
 app.use('/auth', authRouter);
 
+app.use(errorMiddleware);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
