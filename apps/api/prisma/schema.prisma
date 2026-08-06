@@ -21,4 +21,15 @@ model User {
   role     Role   @default(DEVELOPER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  userId    String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

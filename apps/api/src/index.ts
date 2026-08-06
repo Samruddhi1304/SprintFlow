@@ -8,13 +8,14 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("Hello from SprintFlow API");
 });
 
 app.use('/auth', authRouter);
 
 app.use(errorMiddleware);
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
