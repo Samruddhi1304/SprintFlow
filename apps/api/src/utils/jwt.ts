@@ -54,7 +54,7 @@ export const verifyRefreshToken = (
         ) as RefreshTokenPayload;
     } catch {
         throw new AppError(
-            ERROR_MESSAGES.INVALID_ACCESS_TOKEN,
+            ERROR_MESSAGES.INVALID_REFRESH_TOKEN,
             HTTP_STATUS.UNAUTHORIZED
         );
     }
