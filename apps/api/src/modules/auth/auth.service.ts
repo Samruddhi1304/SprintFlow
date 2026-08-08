@@ -1,22 +1,34 @@
 import { HTTP_STATUS } from "../../constants/httpStatus.js";
 import { ERROR_MESSAGES } from "../../constants/errorMessages.js";
 import { AppError } from "../../errors/AppError.js";
-import { prisma } from "../../lib/prisma.js";
 import { getRefreshTokenExpiry } from "../../utils/date.js";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/jwt.js";
-import type { LoginInput, RefreshTokenInput, RegisterInput } from "./auth.schema.js";
+import {
+    generateAccessToken,
+    generateRefreshToken,
+    verifyRefreshToken
+} from "../../utils/jwt.js";
+import type {
+    LoginInput,
+    RefreshTokenInput,
+    RegisterInput
+} from "./auth.schema.js";
 import * as bcrypt from "bcrypt";
+import {
+    createRefreshToken,
+    createUser,
+    deleteRefreshToken,
+    findRefreshToken,
+    findUserByEmail,
+    findUserById,
+    rotateRefreshToken
+} from "./auth.repository.js";
 
 export const getAuthMessage = () => {
     return "Auth Route";
 }
 
 export const registerUser = async (data: RegisterInput) => {
-    const emailExist = await prisma.user.findUnique({
-        where: {
-            email: data.email
-        }
-    });
+    const emailExist = await findUserByEmail(data.email);
     if (emailExist) {
         throw new AppError(
             ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
@@ -24,19 +36,15 @@ export const registerUser = async (data: RegisterInput) => {
         );
     }
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    return await prisma.user.create({
-        data: {
+    return await createUser(
+        {
             ...data, password: hashedPassword
         }
-    })
+    )
 }
 
 export const loginUser = async (data: LoginInput) => {
-    const user = await prisma.user.findUnique({
-        where: {
-            email: data.email
-        }
-    });
+    const user = await findUserByEmail(data.email);
     if (!user) {
         throw new AppError(
             ERROR_MESSAGES.INVALID_CREDENTIALS,
@@ -68,13 +76,13 @@ export const loginUser = async (data: LoginInput) => {
 
     const expiresAt = getRefreshTokenExpiry();
 
-    await prisma.refreshToken.create({
-        data: {
+    await createRefreshToken(
+        {
             token: refreshToken,
             userId: user.id,
             expiresAt,
         },
-    });
+    )
 
     return {
         accessToken,
@@ -87,11 +95,7 @@ export const refreshAccessToken = async (
 ) => {
     const decoded = verifyRefreshToken(data.refreshToken);
 
-    const storedToken = await prisma.refreshToken.findFirst({
-        where: {
-            token: data.refreshToken,
-        },
-    });
+    const storedToken = await findRefreshToken(data.refreshToken);
 
     if (!storedToken) {
         throw new AppError(
@@ -100,11 +104,7 @@ export const refreshAccessToken = async (
         );
     }
 
-    const user = await prisma.user.findUnique({
-        where: {
-            id: decoded.id,
-        },
-    });
+    const user = await findUserById(decoded.id);
 
     if (!user) {
         throw new AppError(
@@ -118,21 +118,14 @@ export const refreshAccessToken = async (
     });
 
     const expiresAt = getRefreshTokenExpiry();
-
-    await prisma.$transaction([
-        prisma.refreshToken.delete({
-            where: {
-                id: storedToken.id,
-            },
-        }),
-        prisma.refreshToken.create({
-            data: {
-                token: newRefreshToken,
-                userId: user.id,
-                expiresAt,
-            },
-        }),
-    ]);
+    await rotateRefreshToken(
+        storedToken.id,
+        {
+            token: newRefreshToken,
+            userId: user.id,
+            expiresAt,
+        }
+    );
 
     const accessToken = generateAccessToken({
         id: user.id,
@@ -151,11 +144,7 @@ export const logoutUser = async (
 ) => {
     verifyRefreshToken(data.refreshToken);
 
-    const storedToken = await prisma.refreshToken.findFirst({
-        where: {
-            token: data.refreshToken,
-        },
-    });
+    const storedToken = await findRefreshToken(data.refreshToken);
 
     if (!storedToken) {
         throw new AppError(
@@ -164,9 +153,5 @@ export const logoutUser = async (
         );
     }
 
-    await prisma.refreshToken.delete({
-        where: {
-            id: storedToken.id,
-        },
-    });
+    await deleteRefreshToken(storedToken.id);
 };
