@@ -1,17 +1,23 @@
 import type { NextFunction, Request, Response } from "express";
 import { verifyAccessToken } from "../utils/jwt.js";
+import { AppError } from "../errors/AppError.js";
+import { ERROR_MESSAGES } from "../constants/errorMessages.js";
+import { HTTP_STATUS } from "../constants/httpStatus.js";
 
 export const authMiddleware = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      message: "Unauthorized",
-    });
+    return  next(
+            new AppError(
+                ERROR_MESSAGES.INVALID_ACCESS_TOKEN,
+                HTTP_STATUS.UNAUTHORIZED
+            )
+        );
   }
 
   const token = authHeader.split(" ")[1];
@@ -23,8 +29,6 @@ export const authMiddleware = (
 
     next();
   } catch (error) {
-    return res.status(401).json({
-      message: "Invalid or expired token",
-    });
+    next(error);
   }
 };
