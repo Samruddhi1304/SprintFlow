@@ -1,5 +1,9 @@
 import jwt from "jsonwebtoken";
 import type { JwtPayload, RefreshTokenPayload } from "../types/auth.types.js";
+import { AppError } from "../errors/AppError.js";
+import { AUTH } from "../constants/auth.js";
+import { ERROR_MESSAGES } from "../constants/errorMessages.js";
+import { HTTP_STATUS } from "../constants/httpStatus.js";
 
 export const generateAccessToken = (user: JwtPayload) => {
 
@@ -7,7 +11,7 @@ export const generateAccessToken = (user: JwtPayload) => {
         user,
         process.env.JWT_ACCESS_SECRET!,
         {
-            expiresIn: "15m",
+            expiresIn: AUTH.ACCESS_TOKEN_EXPIRY,
         }
     )
 }
@@ -18,25 +22,40 @@ export const generateRefreshToken = (user: RefreshTokenPayload) => {
         user,
         process.env.JWT_REFRESH_SECRET!,
         {
-            expiresIn: "7d",
+            expiresIn: AUTH.REFRESH_TOKEN_EXPIRY,
         }
     )
 }
 
 export const verifyAccessToken = (
-  token: string
+    token: string
 ) => {
-    return jwt.verify(
-        token,
-        process.env.JWT_ACCESS_SECRET!
-    ) as JwtPayload;
+    try {
+        return jwt.verify(
+            token,
+            process.env.JWT_ACCESS_SECRET!
+        ) as JwtPayload;
+    } catch {
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_ACCESS_TOKEN,
+            HTTP_STATUS.UNAUTHORIZED
+        );
+    }
 };
 
-export const verifyRefreshToken=(
-    token:string
-):RefreshTokenPayload => {
-  return jwt.verify(
-    token,
-    process.env.JWT_REFRESH_SECRET!
-  ) as RefreshTokenPayload;
+
+export const verifyRefreshToken = (
+    token: string
+): RefreshTokenPayload => {
+    try {
+        return jwt.verify(
+            token,
+            process.env.JWT_REFRESH_SECRET!
+        ) as RefreshTokenPayload;
+    } catch {
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_ACCESS_TOKEN,
+            HTTP_STATUS.UNAUTHORIZED
+        );
+    }
 };
