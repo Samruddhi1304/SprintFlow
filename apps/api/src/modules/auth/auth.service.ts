@@ -1,3 +1,6 @@
+import { HTTP_STATUS } from "../../constants/httpStatus.js";
+import { ERROR_MESSAGES } from "../../constants/errorMessages.js";
+import { AppError } from "../../errors/AppError.js";
 import { prisma } from "../../lib/prisma.js";
 import { getRefreshTokenExpiry } from "../../utils/date.js";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/jwt.js";
@@ -15,7 +18,10 @@ export const registerUser = async (data: RegisterInput) => {
         }
     });
     if (emailExist) {
-        throw new Error("Email already registered!");
+        throw new AppError(
+            ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
+            HTTP_STATUS.CONFLICT
+        );
     }
     const hashedPassword = await bcrypt.hash(data.password, 10);
     return await prisma.user.create({
@@ -32,7 +38,10 @@ export const loginUser = async (data: LoginInput) => {
         }
     });
     if (!user) {
-        throw new Error("Invalid Email or Password");
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_CREDENTIALS,
+            HTTP_STATUS.UNAUTHORIZED
+        );
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -41,7 +50,10 @@ export const loginUser = async (data: LoginInput) => {
     );
 
     if (!isPasswordValid) {
-        throw new Error("Invalid Email or Password");
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_CREDENTIALS,
+            HTTP_STATUS.UNAUTHORIZED
+        );
     }
 
     const accessToken = generateAccessToken({
@@ -82,7 +94,10 @@ export const refreshAccessToken = async (
     });
 
     if (!storedToken) {
-        throw new Error("Invalid refresh token");
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_REFRESH_TOKEN,
+            HTTP_STATUS.UNAUTHORIZED
+        );
     }
 
     const user = await prisma.user.findUnique({
@@ -92,7 +107,10 @@ export const refreshAccessToken = async (
     });
 
     if (!user) {
-        throw new Error("User not found");
+        throw new AppError(
+            ERROR_MESSAGES.USER_NOT_FOUND,
+            HTTP_STATUS.NOT_FOUND
+        );
     }
 
     const newRefreshToken = generateRefreshToken({
@@ -140,7 +158,10 @@ export const logoutUser = async (
     });
 
     if (!storedToken) {
-        throw new Error("Invalid refresh token");
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_REFRESH_TOKEN,
+            HTTP_STATUS.UNAUTHORIZED
+        );
     }
 
     await prisma.refreshToken.delete({

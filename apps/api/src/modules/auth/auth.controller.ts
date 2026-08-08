@@ -2,6 +2,8 @@ import type { Request, Response } from "express"
 import { getAuthMessage, loginUser, logoutUser, refreshAccessToken, registerUser } from "./auth.service.js";
 import { loginSchema, refreshTokenSchema, registerSchema } from "./auth.schema.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { HTTP_STATUS } from "../../constants/httpStatus.js";
+import { SUCCESS_MESSAGES } from "../../constants/successMessages.js";
 
 export const getAuth = (_req: Request, res: Response) => {
     const msg = getAuthMessage();
@@ -13,9 +15,11 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
     await registerUser(data);
 
-    res.status(201).json({
-        message: "User registered successfully",
+    res.status(HTTP_STATUS.CREATED).json({
+        message: SUCCESS_MESSAGES.USER_REGISTERED
     });
+
+    return;
 });
 
 export const login= asyncHandler(async (req: Request, res: Response) => {
@@ -23,14 +27,16 @@ export const login= asyncHandler(async (req: Request, res: Response) => {
 
     const token=await loginUser(data);
 
-    res.status(200).json({
-        message: "User logged in successfully",
+    res.status(HTTP_STATUS.OK).json({
+        message: SUCCESS_MESSAGES.USER_LOGGED_IN,
         ...token
     });
+
+    return;
 });
 
 export const me = asyncHandler(async (req: Request, res: Response) => {
-  res.status(200).json({
+  res.status(HTTP_STATUS.OK).json({
     user: req.user,
   });
 });
@@ -40,7 +46,8 @@ export const refresh = asyncHandler(async (req:Request, res:Response) => {
 
     const token = await refreshAccessToken(data);
 
-    res.status(200).json(token);
+    res.status(HTTP_STATUS.OK).json(token);
+    return;
 });
 
 export const logout = asyncHandler(async (req: Request, res:Response) => {
@@ -48,7 +55,9 @@ export const logout = asyncHandler(async (req: Request, res:Response) => {
 
     await logoutUser(data);
 
-    res.status(200).json({
-        message: "User logged out successfully"
+    res.status(HTTP_STATUS.OK).json({
+        message: SUCCESS_MESSAGES.USER_LOGGED_OUT
     });
+
+    return;
 });
