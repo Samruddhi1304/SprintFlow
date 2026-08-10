@@ -60,14 +60,19 @@ export const rotateRefreshToken = async (
         expiresAt: Date;
     }
 ) => {
-    return prisma.$transaction([
-        prisma.refreshToken.delete({
+    return prisma.$transaction(async (tx) => {
+        const deleted = await tx.refreshToken.deleteMany({
             where: {
                 id: oldTokenId,
             },
-        }),
-        prisma.refreshToken.create({
+        });
+
+        if (deleted.count === 0) {
+            return null;
+        }
+
+        return tx.refreshToken.create({
             data,
-        }),
-    ]);
+        });
+    });
 };
