@@ -1,0 +1,148 @@
+@use "../../styles/variables" as *;
+
+.navbar {
+  width: min(1180px, calc(100% - 48px));
+  height: 72px;
+
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  padding: 0 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: rgba($bg-secondary, 0.96);
+  border: 1px solid $border;
+  border-radius: 16px;
+
+  backdrop-filter: blur(18px);
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+
+  z-index: 1000;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: $text-primary;
+}
+
+.logoMark {
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background: linear-gradient(135deg, $cyan, $primary);
+
+  color: $bg-primary;
+  font-size: 18px;
+  font-weight: 800;
+
+  box-shadow: 0 0 24px rgba($cyan, 0.25);
+}
+
+.logoText {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+
+  a {
+    color: $text-secondary;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
+
+    &:hover {
+      color: $text-primary;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signIn,
+.getStarted {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.signIn {
+  padding: 10px 16px;
+
+  background: transparent;
+  color: $text-secondary;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.getStarted {
+  padding: 10px 17px;
+
+  border: 1px solid $cyan;
+  border-radius: 9px;
+
+  background: rgba($cyan, 0.08);
+  color: $cyan;
+
+  font-weight: 600;
+
+  &:hover {
+    background: $cyan;
+    color: $bg-primary;
+
+    box-shadow: 0 0 22px rgba($cyan, 0.2);
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 760px) {
+  .navbar {
+    width: calc(100% - 24px);
+    margin-top: 12px;
+  }
+
+  .navLinks {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .logoText {
+    display: none;
+  }
+
+  .signIn {
+    display: none;
+  }
+}
