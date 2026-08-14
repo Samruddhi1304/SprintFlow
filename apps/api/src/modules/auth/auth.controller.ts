@@ -48,7 +48,11 @@ export const me = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
-    const data = refreshTokenSchema.parse(req.body);
+    const refreshToken = req.cookies.refreshToken;
+
+    const data = refreshTokenSchema.parse({
+        refreshToken,
+    });
 
     const token = await refreshAccessToken(data);
 
@@ -57,12 +61,22 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
-    const data = refreshTokenSchema.parse(req.body);
+    const refreshToken = req.cookies.refreshToken;
+
+    const data = refreshTokenSchema.parse({
+        refreshToken,
+    });
 
     await logoutUser(data);
 
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    });
+
     res.status(HTTP_STATUS.OK).json({
-        message: SUCCESS_MESSAGES.USER_LOGGED_OUT
+        message: SUCCESS_MESSAGES.USER_LOGGED_OUT,
     });
 
     return;
