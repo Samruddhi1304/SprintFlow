@@ -22,27 +22,37 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     return;
 });
 
-export const login= asyncHandler(async (req: Request, res: Response) => {
+export const login = asyncHandler(async (req: Request, res: Response) => {
     const data = loginSchema.parse(req.body);
 
-    const token=await loginUser(data);
+    const { accessToken, refreshToken } = await loginUser(data);
+
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    });
 
     res.status(HTTP_STATUS.OK).json({
         message: SUCCESS_MESSAGES.USER_LOGGED_IN,
-        ...token
+        accessToken,
     });
 
     return;
 });
 
 export const me = asyncHandler(async (req: Request, res: Response) => {
-  res.status(HTTP_STATUS.OK).json({
-    user: req.user,
-  });
+    res.status(HTTP_STATUS.OK).json({
+        user: req.user,
+    });
 });
 
-export const refresh = asyncHandler(async (req:Request, res:Response) => {
-    const data = refreshTokenSchema.parse(req.body);
+export const refresh = asyncHandler(async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+
+    const data = refreshTokenSchema.parse({
+        refreshToken,
+    });
 
     const token = await refreshAccessToken(data);
 
@@ -50,13 +60,23 @@ export const refresh = asyncHandler(async (req:Request, res:Response) => {
     return;
 });
 
-export const logout = asyncHandler(async (req: Request, res:Response) => {
-    const data = refreshTokenSchema.parse(req.body);
+export const logout = asyncHandler(async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+
+    const data = refreshTokenSchema.parse({
+        refreshToken,
+    });
 
     await logoutUser(data);
 
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    });
+
     res.status(HTTP_STATUS.OK).json({
-        message: SUCCESS_MESSAGES.USER_LOGGED_OUT
+        message: SUCCESS_MESSAGES.USER_LOGGED_OUT,
     });
 
     return;
