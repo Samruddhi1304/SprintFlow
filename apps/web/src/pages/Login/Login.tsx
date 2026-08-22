@@ -11,6 +11,7 @@ import {
 import { useLoginMutation } from "../../store/api/auth/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../store/slices/authSlice";
+import { toast } from "sonner";
 
 
 const Login = () => {
@@ -35,8 +36,9 @@ const Login = () => {
                     accessToken: response.accessToken,
                 }),
             );
+            toast.success("Login successful");
         } catch (error) {
-            console.error("Login failed:", error);
+            toast.error("Invalid email or password");
         }
     };
 

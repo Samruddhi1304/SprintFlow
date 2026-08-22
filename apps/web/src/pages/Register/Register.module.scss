@@ -1,8 +1,9 @@
 @use "../../styles/variables" as *;
 
-.login {
+.register {
   min-height: 100vh;
   padding: 120px 24px 60px;
+
 
   display: flex;
   align-items: center;
@@ -17,9 +18,9 @@
     $bg-primary;
 }
 
-.loginCard {
+.registerCard {
   width: min(440px, 100%);
-  padding: 40px;
+  padding: 24px 40px;
 
   background: rgba($bg-secondary, 0.9);
   border: 1px solid $border;
@@ -31,10 +32,10 @@
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 12px;
 
   h1 {
-    margin: 18px 0 10px;
+    margin: 12px 0 10px;
 
     color: $text-primary;
     font-size: 32px;
@@ -76,7 +77,7 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 
   label {
     color: $text-primary;
@@ -146,7 +147,7 @@
   }
 }
 
-.register {
+.login {
   margin: 24px 0 0;
 
   color: $text-secondary;
@@ -165,11 +166,11 @@
 }
 
 @media (max-width: 640px) {
-  .login {
-    padding: 130px 20px 60px;
+  .register {
+     padding: 80px 20px 50px;
   }
 
-  .loginCard {
+  .registerCard {
     padding: 30px 24px;
   }
 }
